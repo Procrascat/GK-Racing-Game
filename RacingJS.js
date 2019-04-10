@@ -105,22 +105,22 @@ function drawEverything() {
 function moveEverything() {
     //// Car movement
     if(HOLD_Accel == true) {
-        CarSpeed += 1.5;
+        CarSpeed += .15;
     }else{
         HOLD_Accel = false;
     }
     if(HOLD_Rever == true) {
-        CarSpeed -= 1.5;
+        CarSpeed -= .15;
     }else{
         HOLD_Rever = false;
     }
     if(HOLD_LeftT == true) {
-        carAng += -0.3*Math.PI;
+        carAng += -0.13*Math.PI;
     }else{
         HOLD_LeftT = false;
     }
     if(HOLD_RightT == true) {
-        carAng -= -0.3*Math.PI;
+        carAng -= -0.13*Math.PI;
     }else{
         HOLD_RightT = false;
     }
