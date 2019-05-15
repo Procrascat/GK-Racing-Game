@@ -7,6 +7,7 @@ var canvas; ///
 var canvasContext; ///
 var trackGrid = new Array(T_Column, T_Row);
 var CarSpeed = 0;
+const Speed_Decay = 0.94;
 var carPIC = document.createElement("img");
 var carPLoad = false;
 var carAng = 0.0;
@@ -21,26 +22,34 @@ var HOLD_Accel = false;
 var HOLD_Rever = false;
 var HOLD_LeftT = false;
 var HOLD_RightT = false;
-
+//Movement refinment 
+const ACCEL_POW = 0.5;
+const REVER_POW = 0.2;
+const TURN_POW = 0.05;
+const MIN_TURN = 0.3;
+ 
 //Enviornment 
+//Map Grid
 var trackGrid = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]; ///
 const T_Width = 40;
 const T_Height = 40;
 const T_Gap = 1;
 var T_Column = 20;
 var T_Row = 15;
+// this doesn't work and it upsets me.
 var Music = new Audio("bachpiece.mp3");
 
 //Debug
 document.getElementById("debugText").innerHTML = "replacement text";
 
-
+////////
 ////////
 
 function keyPressed(evt) {
     document.getElementById("debugText").innerHTML = "KeyCode Pressed: " + evt.keyCode;
-    
-    //acceleration
+    //PlayMusic();
+    //Acceleration
+    //Takes key press from user(evt.keyCode) and compares it to a specific key(UPKEY, DOWNKEY, RIGHTKEY and LEFTKEY) needed to move car
     if(evt.keyCode == UPKEY) {
         HOLD_Accel = true;
     }else if(evt.keyCode == DOWNKEY) {
@@ -48,17 +57,35 @@ function keyPressed(evt) {
     }
     
     //Turning
-    if(evt.keyCode == RIGHTKEY) {
+    if(evt.keyCode == RIGHTKEY && (HOLD_Accel == true || HOLD_Rever == true)) {
         HOLD_LeftT = true;
-    }else if(evt.keyCode == LEFTKEY) {
+    }else if(evt.keyCode == LEFTKEY && (HOLD_Accel == true || HOLD_Rever == true)) {
         HOLD_RightT = true;
     }
 
+    // Prevents default window scrolling
     evt.preventDefault(); 
 }
 
 function keyReleased(evt) {
+
+    //Ceases any movement once key(evt.keyCode) is not pressed
     document.getElementById("debugText").innerHTML = "KeyCode Released: " + evt.keyCode;
+
+    if(evt.keyCode == UPKEY) {
+        HOLD_Accel = false;
+        
+    }else if(evt.keyCode == DOWNKEY) {
+        HOLD_Rever = false;
+    }
+    
+    
+    
+    if(evt.keyCode == RIGHTKEY) {
+        HOLD_LeftT = false;
+    }else if(evt.keyCode == LEFTKEY) {
+        HOLD_RightT = false;
+    }
 }
 
 window.onload = function() {
@@ -70,9 +97,11 @@ window.onload = function() {
     carPIC.onload = function() {
     carPLoad = true; // displays pic after loading
     }
-    carPIC.src = "player1(revised).png";
+    // Image recolored to green
     // Author: sheikh_tuhin (qubodup remix)(Submitted by qubodup) https://opengameart.org/content/red-car-top-down
     // Public domain asset
+    carPIC.src = "player1(revised).png";
+    //
     
     //Controls
     document.addEventListener("keydown", keyPressed);
@@ -84,7 +113,7 @@ window.onload = function() {
         moveEverything();
     }, 1000 / Framerate);
 
-    PlayMusic();
+    
 }
 
 function drawEverything() {
@@ -105,22 +134,26 @@ function drawEverything() {
 function moveEverything() {
     //// Car movement
     if(HOLD_Accel == true) {
-        CarSpeed += .15;
+        CarSpeed += ACCEL_POW;
     }else{
         HOLD_Accel = false;
     }
     if(HOLD_Rever == true) {
-        CarSpeed -= .15;
+        CarSpeed -= REVER_POW;
     }else{
         HOLD_Rever = false;
     }
     if(HOLD_LeftT == true) {
-        carAng += -0.13*Math.PI;
+        
+            carAng += TURN_POW*Math.PI;
+        
     }else{
         HOLD_LeftT = false;
     }
     if(HOLD_RightT == true) {
-        carAng -= -0.13*Math.PI;
+        
+            carAng -= TURN_POW*Math.PI;
+        
     }else{
         HOLD_RightT = false;
     }
@@ -136,11 +169,17 @@ function moveEverything() {
 
     TrackCordTOIndex(T_Column, T_Row);
 
-
+    CarSpeed *= Speed_Decay;
 }
 
 function PlayMusic() {
-    Music.play();
+    document.querySelector('button').addEventListener('click', function() {
+        var context = new AudioContext();
+
+        context = "bachpiece.mp3";
+    });
+
+   
 }
 
 /*function PauseMusic() {
