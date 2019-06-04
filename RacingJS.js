@@ -35,26 +35,40 @@ window.onload = function() {
     // loads car
     
     carPIC.onload = function() {
-    carPLoad = true; // displays pic after loading
+         // displays pic after loading
     }
     // Image recolored to green
     // Author: sheikh_tuhin (qubodup remix)(Submitted by qubodup) https://opengameart.org/content/red-car-top-down
     // Public domain asset
     carPIC.src = "player1(revised).png";
     //
+
+    roadPIC.onload = function() {
+        roadLoad = true;
+    }
+    roadPIC.src = "Road.png";
+
+    wallPIC.onload = function() {
+        wallLoad = true;
+    }
+    wallPIC.src = "GroundBoundary.png";
     
     //Controls
     initInput();
     
 
-    var Framerate = 60;
+    LoadandCountImg();
+
+    
+}
+
+function LoadingPreGame() {
+    var Framerate = 30;
     setInterval(function () {
         console.log(CarSpeed);
         drawEverything();
         moveEverything();
     }, 1000 / Framerate);
-
-    
 }
 
 function drawEverything() {

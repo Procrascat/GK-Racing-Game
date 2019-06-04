@@ -14,7 +14,7 @@ function Ball(CXpos, CYpos, Clength, CColor) {
     canvasContext.fill();
 }
 function Car(Img, PosX, PosY, Ang) {
-    if(carPLoad) {
+    if(ImgCounter >= 0) {
         canvasContext.save();
         canvasContext.translate(PosX, PosY);
         canvasContext.rotate(Ang);

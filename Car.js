@@ -10,14 +10,14 @@ var canvasContext; ///
 var trackGrid = new Array(T_Column, T_Row);
 var CarSpeed = 0;
 const Speed_Decay = 0.94;
-var carPIC = document.createElement("img");
-var carPLoad = false;
+
+
 var carAng = -0.5*Math.PI;
 
 
 function initCar() {
-    //// Background 
-    colorRect(0, 0, canvas.width, canvas.height, 'black'); //
+  
+    
 
 
     //// Bricks 

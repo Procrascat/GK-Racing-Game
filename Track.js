@@ -5,19 +5,26 @@ const TrackWall = 1;
 const CarSpawn = 2;
 const T_Width = 40;
 const T_Height = 40;
-const T_Gap = 1;
+
 var T_Column = 20;
 var T_Row = 15;
+
+
 
 function Track() {
 
     for (var TrackCCord = 0; TrackCCord <= T_Column; TrackCCord++) { // adds brick in each column
         for (var TrackRCord = 0; TrackRCord <= T_Row; TrackRCord++) { // adds brick in each row
+            var TrackX = TrackCCord * T_Width;
+            var TrackY = TrackRCord * T_Height;
             if (TrackWallCord(TrackCCord, TrackRCord)) {
-                var TrackX = TrackCCord * T_Width;
-                var TrackY = TrackRCord * T_Height;
+                
+                //Draw wall image
+                canvasContext.drawImage(wallPIC, TrackX, TrackY);
                 /////Brick
-                colorRect(TrackX, TrackY, (T_Width - T_Gap), (T_Height - T_Gap), 'blue'); //
+                
+            }else{
+                canvasContext.drawImage(roadPIC, TrackX, TrackY);
             }
         }
     }
